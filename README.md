@@ -1,3 +1,53 @@
+## 个人说明
+
+本仓库用于自制骨架数据集,用于行为识别
+
+### 使用
+
+#### 生成单个视频骨架数据
+
+在程序中修改待处理视频的父目录
+
+`video_dir = "/home/xzy/Data/扶梯项目数据集/姿态检测数据集/2021摔倒数据集/摔倒"`
+
+运行
+
+```shell
+python XZY/make_skeleton_csv.py \
+    --det_config demo/mmdetection_cfg/cascade_rcnn_x101_64x4d_fpn_coco.py \
+    --det_checkpoint http://download.openmmlab.com/mmdetection/v2.0/cascade_rcnn/cascade_rcnn_x101_64x4d_fpn_1x_coco/cascade_rcnn_x101_64x4d_fpn_1x_coco_20200515_075702-43ce6a30.pth \
+    --pose_config configs/body/2d_kpt_sview_rgb_img/topdown_heatmap/coco/hrnet_w48_coco_384x288_udp.py \
+    --pose_checkpoint https://download.openmmlab.com/mmpose/top_down/udp/hrnet_w48_coco_384x288_udp-0f89c63e_20210223.pth \
+    --video-path demo/resources/demo.mp4 \
+    --out-video-root vis_results
+```
+
+批处理视频,将骨架数据`csv`保存到视频同目录下
+
+**注意:**
+这里直接使用的det+pose,尝试了det+tracking+pose但效果不好,频繁在几帧检测不到
+理论上使用SOT可以避免很多问题,但mmpose的SOT效果巨差,如果有时间建议使用SOT制作单人数据集
+
+#### 骨架数据组合
+
+将所有视频的csv骨架数据保存到一个pkl文件,用于gcn训练
+
+在`csv_dir_list`中添加csv文件所在路径,然后执行
+
+```shell
+python XZY/csv_to_pkl.py
+```
+
+就会在当前文件夹下生成包含所有动作骨架数据的`pkl文件`
+
+### 待解决的问题
+
+1. 在生成csv时,必须保证视频中只检测到一个人,不可以存在第二个人
+   1. 可以使用带有跟踪的骨架检测,这样只选取存在时间最长的人保留即可
+2. 保存csv也只会保存一个人,不会保存第二个人
+
+
+
 <div align="center">
     <img src="resources/mmpose-logo.png" width="400"/>
 </div>
