@@ -3,7 +3,7 @@
 # 工具：PyCharm
 import os
 # os.chdir('../')
-from XZY import gol
+from XZY.libs import gol
 
 gol._init()
 import numpy as np
@@ -15,8 +15,8 @@ import cv2
 from mmpose.apis import (inference_top_down_pose_model, init_pose_model,
                          vis_pose_result)
 from mmdet.apis import show_result_pyplot
-from XZY.config import coco_idx_keypoint_map
-from XZY.save_csv_lib import save_csv_for_per_video, show_keypoint
+from XZY.libs.config import coco_idx_keypoint_map
+from XZY.libs.save_csv_lib import save_csv_for_per_video, show_keypoint
 
 try:
     from mmdet.apis import inference_detector, init_detector
@@ -79,7 +79,7 @@ def parser_init():
     parser.add_argument(
         '--bbox-thr',
         type=float,
-        default=0.3,  # default=0.3,
+        default=0.1,  # default=0.3,
         help='Bounding box score threshold')
     parser.add_argument(
         '--kpt-thr', type=float, default=0.0, help='Keypoint score threshold')  # default=0.3
@@ -90,10 +90,11 @@ def parser_init():
     return args
 
 
-def main(args):
+def main(args, is2021_data=False):
     """Visualize the demo images.
-
     Using mmdet to detect the human.
+    is2021_data: True: 针对2021采集的数据做了特定的噪声处理
+
     """
 
     assert args.show or (args.out_video_root != '')
@@ -119,8 +120,12 @@ def main(args):
 
     if save_out_video:
         fps = cap.get(cv2.CAP_PROP_FPS)
-        size = (int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)),  # //2 是因为后面处理时//2
-                int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT) * 2))
+        if is2021_data:
+            size = (int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)),  # //2 是因为后面处理时//2
+                    int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT) * 2))
+        else:
+            size = (int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)),  # //2 是因为后面处理时//2
+                    int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)))
         fourcc = cv2.VideoWriter_fourcc(*'mp4v')
         # fourcc = cv2.VideoWriter_fourcc(*'AVC1')
         videoWriter = cv2.VideoWriter(
@@ -141,16 +146,17 @@ def main(args):
 
         # region    ##############################################
         # 切除一部分图片 + 屏蔽左上角人的影响 + 放大图片
-        img = img[:, 0:img.shape[1] // 2, :]
-        mask_pos = (40, 150, 3)
-        mask_pos2 = (0, 390, 27, 440, 3)
-        img = cv2.resize(img, (0, 0), fx=2, fy=2, interpolation=cv2.INTER_CUBIC)
-        if "正常" not in args.video_path:
-            points1 = np.array([[480, 0], [570, img.shape[0]], [img.shape[1], img.shape[0]], [img.shape[1], 0]], np.int32)
-            points2 = np.array([[0, 310], [332, 60], [500, 60], [500, 0], [0, 0]], np.int32)
-            fill_color = (255,255,255)
-            cv2.fillPoly(img, [points1], fill_color)
-            cv2.fillPoly(img, [points2], fill_color)
+        if is2021_data:
+            img = img[:, 0:img.shape[1] // 2, :]
+            mask_pos = (40, 150, 3)
+            mask_pos2 = (0, 390, 27, 440, 3)
+            img = cv2.resize(img, (0, 0), fx=2, fy=2, interpolation=cv2.INTER_CUBIC)
+            if "正常" not in args.video_path:
+                points1 = np.array([[480, 0], [570, img.shape[0]], [img.shape[1], img.shape[0]], [img.shape[1], 0]], np.int32)
+                points2 = np.array([[0, 310], [332, 60], [500, 60], [500, 0], [0, 0]], np.int32)
+                fill_color = (255,255,255)
+                cv2.fillPoly(img, [points1], fill_color)
+                cv2.fillPoly(img, [points2], fill_color)
         # endregion ##############################################
 
         # test a single image, the resulting box is (x1, y1, x2, y2)
@@ -161,7 +167,7 @@ def main(args):
         # region    ##############################################
         # 按照xmax排序，保留最右侧的 + 放大检测框20%，确保可以完整的框住整个人，防止丢掉部分关节
 
-        if "正常" in args.video_path:
+        if "正常" in args.video_path and is2021_data:
             for i in range(len(person_results) - 1, -1, -1):  # 删除右上一小部分有影响的box
                 box = person_results[i]
                 xmin, ymin, xmax, ymax, _ = box['bbox']
@@ -171,18 +177,6 @@ def main(args):
                     del person_results[i]
 
         # region 根据视频而做的处理，以保证结果中只有一个人
-        def cmp_xmax(x1, x2):
-            if x1['bbox'][2] > x2['bbox'][2]:
-                return -1  # 大的在前
-            else:
-                return 1
-
-        def cmp_ymax(x1, x2):
-            if x1['bbox'][3] > x2['bbox'][3]:
-                return -1  # 大的在前
-            else:
-                return 1
-
         def cmp(x1, x2):
             # if x1['bbox'][3] + x1['bbox'][2] > x2['bbox'][3] + x2['bbox'][2]:
             h, w = img.shape[0:2]
@@ -191,12 +185,6 @@ def main(args):
             else:
                 return 1
 
-        # person_results_xmax = sorted(person_results, key=functools.cmp_to_key(cmp_xmax))
-        # person_results_ymax = sorted(person_results, key=functools.cmp_to_key(cmp_ymax))
-        # if person_results_ymax[0]['bbox'][3] / person_results_xmax[0]['bbox'][3] > 2:
-        #     person_results = [person_results_ymax[0]]
-        # else:
-        #     person_results = [person_results_xmax[0]]
         if len(person_results) > 0:
             person_results = sorted(person_results, key=functools.cmp_to_key(cmp))
             person_results = [person_results[0]]
@@ -275,28 +263,27 @@ python XZY/make_skeleton_csv.py \
 
 if __name__ == '__main__':
     args = parser_init()
-    video_dir = "/home/xzy/Data/扶梯项目数据集/姿态检测数据集/2021摔倒数据集/摔倒"
-    for video_name in os.listdir(video_dir):
-        if not video_name.endswith('.mp4'):
-            continue
-        # if '摔倒检测1' in video_name:
-        #     continue
-        print(f'deal with video : {video_name}')
-        video_path = os.path.join(video_dir, video_name)
-        gol.set_value("video_path", value=video_path)
-        gol.set_value("change_video", value=True)
-        args.video_path = video_path
-        main(args=args)
-
-    video_dir = "/home/xzy/Data/扶梯项目数据集/姿态检测数据集/2021摔倒数据集/正常站立"
-    for video_name in os.listdir(video_dir):
-        if not video_name.endswith('.mp4'):
-            continue
-        # if '摔倒检测1' in video_name:
-        #     continue
-        print(f'deal with video : {video_name}')
-        video_path = os.path.join(video_dir, video_name)
-        gol.set_value("video_path", value=video_path)
-        gol.set_value("change_video", value=True)
-        args.video_path = video_path
-        main(args=args)
+    video_dir_list = [
+        # "/home/xzy/Data/扶梯项目数据集/姿态检测数据集/2021摔倒数据集/摔倒",
+        # "/home/xzy/Data/扶梯项目数据集/姿态检测数据集/2021摔倒数据集/正常站立",
+        "/home/xzy/Data/扶梯项目数据集/姿态检测数据集/2021摔倒数据集/back_against",
+        "/home/xzy/Data/扶梯项目数据集/姿态检测数据集/2021摔倒数据集/climb",
+        "/home/xzy/Data/扶梯项目数据集/姿态检测数据集/2021摔倒数据集/fall_behind",
+        "/home/xzy/Data/扶梯项目数据集/姿态检测数据集/2021摔倒数据集/fall_toward",
+        "/home/xzy/Data/扶梯项目数据集/姿态检测数据集/2021摔倒数据集/hand_out",
+        "/home/xzy/Data/扶梯项目数据集/姿态检测数据集/2021摔倒数据集/head_and_hand_out",
+        "/home/xzy/Data/扶梯项目数据集/姿态检测数据集/2021摔倒数据集/normal_standing",
+    ]
+    for video_dir in video_dir_list:
+        for video_name in os.listdir(video_dir):
+            if (not video_name.endswith('.mp4')) and \
+                    (not video_name.endswith('.avi')):
+                continue
+            # if '摔倒检测1' in video_name:
+            #     continue
+            video_path = os.path.join(video_dir, video_name)
+            print(f'deal with video : {video_path}')
+            gol.set_value("video_path", value=video_path)
+            gol.set_value("change_video", value=True)
+            args.video_path = video_path
+            main(args=args)

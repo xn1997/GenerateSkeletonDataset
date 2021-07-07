@@ -1,8 +1,8 @@
 # 作者：Xiang Zhaoyi
 # 日期：2021/6/2 下午8:03
 # 工具：PyCharm
-from XZY import gol
-from XZY.config import csv_idx_keypoint_map, coco_idx_keypoint_map
+from XZY.libs import gol
+from XZY.libs.config import csv_idx_keypoint_map, coco_idx_keypoint_map
 import pandas as pd
 import cv2
 import os
@@ -70,8 +70,10 @@ def save_csv_for_per_video(keypoints):
         result_skeleton[keypoint_str + 'c'] = score
     if '正常' in csv_path:
         result_skeleton['activity'] = 'normal_standing'  # 标记当前的动作,手动设置
-    else:
+    elif '摔倒' in os.path.basename(os.path.dirname(csv_path)):
         result_skeleton['activity'] = 'fall'
+    else:
+        result_skeleton['activity'] = os.path.basename(os.path.dirname(csv_path))
     csv_info = csv_info.append(result_skeleton)
     csv_info.to_csv(csv_path)
 
