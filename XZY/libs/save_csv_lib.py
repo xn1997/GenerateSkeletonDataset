@@ -78,6 +78,59 @@ def save_csv_for_per_video(keypoints):
     csv_info.to_csv(csv_path)
 
 
+def save_csv_for_per_video_tracking(tracking_results):
+    global frame_count
+    frame_count += 1
+
+    video_path = gol.get_value("video_path")
+    csv_path = video_path.split('.')[0] + '.csv'
+    if gol.get_value("change_video"):
+        # 如果换了视频，就置当前帧数
+        gol.set_value("change_video", False)
+        frame_count = 1
+
+    col = []
+    for x in csv_idx_keypoint_map['CN'].values():
+        col.append(x + 'x')
+        col.append(x + 'y')
+        col.append(x + 'c')
+    # col.append('activity')
+    if frame_count == 1:
+        # 创建空的csv文件
+        pd.DataFrame(columns=col, dtype=float).to_csv(csv_path)
+    csv_info = pd.read_csv(csv_path, index_col=0)  # 读取已有csv内的信息，跳过多余的第一行
+
+    for person in tracking_results:
+        track_id = person['track_id']
+        keypoints = person['keypoints']
+        idx = [f'第{frame_count}帧第{track_id}个人']
+        result_skeleton = pd.DataFrame(index=idx, columns=col, dtype=float)
+
+        # region Description 改掉这一块，即可，其他保存不用变
+        for i in range(18):
+            if i != 17:
+                x, y, score = keypoints[i]
+                keypoint_str = coco_idx_keypoint_map['CN'][i]
+            else:  # 根据左右肩计算出颈的结点
+                x, y, score = (keypoints[5] + keypoints[6]) / 2
+                keypoint_str = csv_idx_keypoint_map['CN'][1]
+        # endregion
+
+            #####################################################
+            # 保存到csv文件
+            #####################################################
+            result_skeleton[keypoint_str + 'x'] = x
+            result_skeleton[keypoint_str + 'y'] = y
+            result_skeleton[keypoint_str + 'c'] = score
+        # if '正常' in csv_path:
+        #     result_skeleton['activity'] = 'normal_standing'  # 标记当前的动作,手动设置
+        # elif '摔倒' in os.path.basename(os.path.dirname(csv_path)):
+        #     result_skeleton['activity'] = 'fall'
+        # else:
+        #     result_skeleton['activity'] = os.path.basename(os.path.dirname(csv_path))
+        csv_info = csv_info.append(result_skeleton)
+    csv_info.to_csv(csv_path)
+
 if __name__ == '__main__':
     result = pd.DataFrame(index=['x', 'y', 'c'], columns=csv_idx_keypoint_map['CN'].values(), dtype=float)
     result['头'] = [5, 6, 7]

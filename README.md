@@ -19,7 +19,7 @@ python XZY/make_skeleton_csv.py \
     --pose_config configs/body/2d_kpt_sview_rgb_img/topdown_heatmap/coco/hrnet_w48_coco_384x288_udp.py \
     --pose_checkpoint https://download.openmmlab.com/mmpose/top_down/udp/hrnet_w48_coco_384x288_udp-0f89c63e_20210223.pth \
     --video-path demo/resources/demo.mp4 \ # 这个参数随意设置,没有意义这里
-    --out-video-root vis_results
+    --out-video-root vis_results # 画出骨架的视频保存路径
 ```
 
 
@@ -53,6 +53,15 @@ ZCCT31_clop_image.avi
 <div align="center">
     <img src="resources/mmpose-logo.png" width="400"/>
 </div>
+### 7-19网络数据集骨架检测脚本.py
+
+面向普通数据的处理脚本
+
+1. 自动检索二级目录下的所有视频
+2. 将视频的检测结果及骨架数据保存至vis_results文件夹下的同名文件夹下（目录结构和视频结果一模一样）
+3. csv文件结构如下
+   ![image-20210730154633095](https://gitee.com/xn1997/picgo/raw/master/image-20210730154633095.png)
+   保存了每帧每个人的坐标（人是进行了跟踪的）
 
 ## Introduction
 
