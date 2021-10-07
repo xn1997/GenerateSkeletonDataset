@@ -1,6 +1,9 @@
 # 作者：Xiang Zhaoyi
 # 日期：2021/6/3 上午11:10
 # 工具：PyCharm
+"""
+功能：批量检测视频中的骨架，并保存骨架信息到csv文件，且保存对应的视频
+"""
 import os
 # os.chdir('../')
 from XZY.libs import gol

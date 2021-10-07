@@ -272,23 +272,23 @@ def _inference_single_pose_model(model,
         # prepare data
         data = {
             'img_or_path':
-            img_or_path,
+                img_or_path,
             'center':
-            center,
+                center,
             'scale':
-            scale,
+                scale,
             'bbox_score':
-            bbox[4] if len(bbox) == 5 else 1,
+                bbox[4] if len(bbox) == 5 else 1,
             'bbox_id':
-            0,  # need to be assigned if batch_size > 1
+                0,  # need to be assigned if batch_size > 1
             'dataset':
-            dataset,
+                dataset,
             'joints_3d':
-            np.zeros((cfg.data_cfg.num_joints, 3), dtype=np.float32),
+                np.zeros((cfg.data_cfg.num_joints, 3), dtype=np.float32),
             'joints_3d_visible':
-            np.zeros((cfg.data_cfg.num_joints, 3), dtype=np.float32),
+                np.zeros((cfg.data_cfg.num_joints, 3), dtype=np.float32),
             'rotation':
-            0,
+                0,
             'ann_info': {
                 'image_size': np.array(cfg.data_cfg['image_size']),
                 'num_joints': cfg.data_cfg['num_joints'],
@@ -465,11 +465,11 @@ def inference_bottom_up_pose_model(model,
         'dataset': 'coco',
         'ann_info': {
             'image_size':
-            cfg.data_cfg['image_size'],
+                cfg.data_cfg['image_size'],
             'num_joints':
-            cfg.data_cfg['num_joints'],
+                cfg.data_cfg['num_joints'],
             'flip_index':
-            [0, 2, 1, 4, 3, 6, 5, 8, 7, 10, 9, 12, 11, 14, 13, 16, 15],
+                [0, 2, 1, 4, 3, 6, 5, 8, 7, 10, 9, 12, 11, 14, 13, 16, 15],
         }
     }
 
@@ -498,7 +498,7 @@ def inference_bottom_up_pose_model(model,
 
         for idx, pred in enumerate(result['preds']):
             area = (np.max(pred[:, 0]) - np.min(pred[:, 0])) * (
-                np.max(pred[:, 1]) - np.min(pred[:, 1]))
+                    np.max(pred[:, 1]) - np.min(pred[:, 1]))
             pose_results.append({
                 'keypoints': pred[:, :3],
                 'score': result['scores'][idx],
@@ -557,9 +557,30 @@ def vis_pose_result(model,
             0, 0, 0, 0, 7, 7, 7, 9, 9, 9, 9, 9, 16, 16, 16, 16, 16, 16, 16
         ]]
         pose_kpt_color = palette[[
-            16, 16, 16, 16, 16, 9, 9, 9, 9, 9, 9, 0, 0, 0, 0, 0, 0
+            16, 16, 16, 16, 16,  # 头部特征点
+            9, 9, 9, 9, 9, 9,  # 手臂特征点
+            0, 0, 0, 0, 0, 0  # 腿部特征点
         ]]
+    elif dataset == 'Paper':
+        # 论文中的14个骨架点画法
+        skeleton = [[16, 14], [14, 12], [17, 15], [15, 13],
+                    [6, 7], [6, 8], [7, 9], [8, 10], [9, 11],
+                    [1, 5], [5, 12], [5, 13], [5, 6], [5, 7], [1, 5],
+                    [5, 12], [5, 13], [5, 13], [5, 13],
+                    # [6, 12], [7, 13], [12, 13], [2, 3],# 肩膀-臀
+                    # [1, 2], [1, 3], [2, 4], [3, 5], [4, 6], [5, 7]  # 头部链接
+                    ]
 
+        pose_limb_color = palette[[
+            16, 16, 16, 16, 16, 16, 16,
+            16, 16, 16, 16, 16,
+            16, 16, 16, 16, 16, 16, 16
+        ]]
+        pose_kpt_color = palette[[
+            17, 17, 17, 17, 17,  # 头部特征点
+            17, 17, 17, 17, 17, 17,  # 手臂特征点
+            17, 17, 17, 17, 17, 17  # 腿部特征点
+        ]]
     elif dataset == 'TopDownCocoWholeBodyDataset':
         # show the results
         skeleton = [[16, 14], [14, 12], [17, 15], [15, 13], [12, 13], [6, 12],

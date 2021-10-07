@@ -338,6 +338,8 @@ if __name__ == '__main__':
     ]
     for video_dir in video_dir_list:
         for video_dir2 in os.listdir(video_dir):
+            if video_dir2 in ['1', '2', '3', '4']:
+                continue
             for video_name in os.listdir(os.path.join(video_dir, video_dir2)):
                 if (not video_name.endswith('.mp4')) and \
                         (not video_name.endswith('.avi')):
