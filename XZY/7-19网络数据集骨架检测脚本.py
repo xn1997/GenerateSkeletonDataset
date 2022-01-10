@@ -323,7 +323,23 @@ python XZY/7-19网络数据集骨架检测脚本.py \
     --out-video-root vis_results
 '''
 ################################################
-'''该脚本只负责检测图片，不会保存csv'''
+"""
+杜老师本科学生项目数据集骨架信息生成程序(通过修改USE_TRACK=False,就可以变成扶梯项目训练集的生成程序)---是make_skeleton_csv.py的优化版本,增加了目标跟踪程序
+
+输入: 视频文件夹 list列表
+功能:
+    1. 生成coco骨架检测结果csv文件(跟踪之后的检测结果)
+    2. 将骨架检测结果画在原视频上
+参数:
+    1. USE_TRACK:
+        True:使用deepsort作为目标跟踪算法,保存每帧所有目标的骨架信息(无类别信息)
+            一般图像中有多人时使用
+        False:无目标跟踪,每帧只保存一个目标的骨架信息+类别信息(类别名字就是视频所在文件夹名字)
+            制作单人行为数据集时最为常用
+注意:
+    1. 默认不使用针对2021数据的图像mask操作---去除干扰信息
+    2. 默认使用deepsort作为目标跟踪算法,即USE_TRACK=True
+"""
 if __name__ == '__main__':
     args = parser_init()
     load_models(args)
@@ -338,8 +354,8 @@ if __name__ == '__main__':
     ]
     for video_dir in video_dir_list:
         for video_dir2 in os.listdir(video_dir):
-            if video_dir2 in ['1', '2', '3', '4']:
-                continue
+            # if video_dir2 in ['1', '2', '3', '4']:
+            #     continue
             for video_name in os.listdir(os.path.join(video_dir, video_dir2)):
                 if (not video_name.endswith('.mp4')) and \
                         (not video_name.endswith('.avi')):

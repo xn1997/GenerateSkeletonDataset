@@ -4,7 +4,7 @@
 
 ### 使用
 
-#### 生成单个视频骨架数据
+#### 生成单个视频骨架数据`make_skeleton_csv.py`
 
 在程序中修改待处理视频的父目录列表
 
@@ -40,20 +40,20 @@ python XZY/csv_to_pkl.py
 
 就会在当前文件夹下生成包含所有动作骨架数据的`pkl文件`
 
-### 待解决的问题
+#### 待解决的问题
 
 1. 在生成csv时,必须保证视频中只检测到一个人,不可以存在第二个人
    1. 可以使用带有跟踪的骨架检测,这样只选取存在时间最长的人保留即可
 2. 保存csv也只会保存一个人,不会保存第二个人
 
-### 有问题的视频记录
+#### 有问题的视频记录
 
 ZCCT31_clop_image.avi
 
 <div align="center">
     <img src="resources/mmpose-logo.png" width="400"/>
 </div>
-### 7-19网络数据集骨架检测脚本.py
+#### `7-19网络数据集骨架检测脚本.py`
 
 面向普通数据的处理脚本
 
@@ -62,6 +62,24 @@ ZCCT31_clop_image.avi
 3. csv文件结构如下
    ![image-20210730154633095](https://gitee.com/xn1997/picgo/raw/master/image-20210730154633095.png)
    保存了每帧每个人的坐标（人是进行了跟踪的）
+
+#### `csv_to_pkl.py`
+
+将所有的csv文件合并到一个pkl中,方便`Project-ActionRecognize`仓库训练图卷积模型.
+
+#### `9-29提取单帧骨架.py`
+
+只用来展示骨架检测效果,并不保存骨架信息.
+
+### 使用流程图
+
+```mermaid
+graph TD
+运行``make_skeleton_csv.py`提取图片得到骨架信息csv文件-->
+使用`csv_to_pkl.py`将所有的csv文件转换为一个pkl文件,用于图卷积的训练
+```
+
+
 
 ## Introduction
 

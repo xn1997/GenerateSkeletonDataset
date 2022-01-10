@@ -29,6 +29,10 @@ def show_keypoint(img, keypoints):
 
 
 def save_csv_for_per_video(keypoints):
+    """
+    保存坐标+置信度+类别:
+        类别:就是视频所在目录的名字
+    """
     global frame_count
     frame_count += 1
 
@@ -79,6 +83,9 @@ def save_csv_for_per_video(keypoints):
 
 
 def save_csv_for_per_video_tracking(tracking_results):
+    """
+    只保存坐标+置信度,不保存类别
+    """
     global frame_count
     frame_count += 1
 
