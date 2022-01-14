@@ -350,7 +350,8 @@ if __name__ == '__main__':
         # "/home/xzy/Data/扶梯项目数据集/其他数据集/行为识别数据集/网络部分行为识别视频/弯腰捡东西",
         # "/home/xzy/Data/扶梯项目数据集/其他数据集/行为识别数据集/网络部分行为识别视频/转身",
         # "/home/xzy/Data/扶梯项目数据集/其他数据集/行为识别数据集/网络部分行为识别视频/坐下起立",
-        "/home/xzy/Data/扶梯项目数据集/其他数据集/行为识别数据集/补拍视频"
+        # "/home/xzy/Data/扶梯项目数据集/其他数据集/行为识别数据集/补拍视频"
+        "/home/xzy/Data/扶梯项目数据集/其他数据集/行为识别数据集/扩充样本"
     ]
     for video_dir in video_dir_list:
         for video_dir2 in os.listdir(video_dir):
