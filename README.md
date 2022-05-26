@@ -60,7 +60,7 @@ ZCCT31_clop_image.avi
 1. 自动检索二级目录下的所有视频
 2. 将视频的检测结果及骨架数据保存至vis_results文件夹下的同名文件夹下（目录结构和视频结果一模一样）
 3. csv文件结构如下
-   ![image-20210730154633095](https://raw.githubusercontent.com/xn1997/picgo/raw/master/image-20210730154633095.png)
+   ![image-20210730154633095](https://raw.githubusercontent.com/xn1997/picgo/master/image-20210730154633095.png)
    保存了每帧每个人的坐标（人是进行了跟踪的）
 
 #### `csv_to_pkl.py`
