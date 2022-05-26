@@ -60,7 +60,7 @@ ZCCT31_clop_image.avi
 1. 自动检索二级目录下的所有视频
 2. 将视频的检测结果及骨架数据保存至vis_results文件夹下的同名文件夹下（目录结构和视频结果一模一样）
 3. csv文件结构如下
-   ![image-20210730154633095](https://gitee.com/xn1997/picgo/raw/master/image-20210730154633095.png)
+   ![image-20210730154633095](https://raw.githubusercontent.com/xn1997/picgo/raw/master/image-20210730154633095.png)
    保存了每帧每个人的坐标（人是进行了跟踪的）
 
 #### `csv_to_pkl.py`
@@ -75,7 +75,7 @@ ZCCT31_clop_image.avi
 
 ```mermaid
 graph TD
-运行``make_skeleton_csv.py`提取图片得到骨架信息csv文件-->
+运行`make_skeleton_csv.py`提取图片得到骨架信息csv文件-->
 使用`csv_to_pkl.py`将所有的csv文件转换为一个pkl文件,用于图卷积的训练
 ```
 
